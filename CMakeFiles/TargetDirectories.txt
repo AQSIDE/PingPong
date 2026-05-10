@@ -1,0 +1,3 @@
+C:/Users/PC/Documents/GitHub/PingPong/CMakeFiles/client.dir
+C:/Users/PC/Documents/GitHub/PingPong/CMakeFiles/edit_cache.dir
+C:/Users/PC/Documents/GitHub/PingPong/CMakeFiles/rebuild_cache.dir

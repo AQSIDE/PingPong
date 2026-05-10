@@ -1,0 +1,9 @@
+.idea/
+.vscode/
+
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+build/
+
+Testing/
