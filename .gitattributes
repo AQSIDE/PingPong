@@ -1,3 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-libs/** linguist-detectable=false
+core/libs/** linguist-vendored
+core/libs/** linguist-detectable=false
