@@ -9,33 +9,43 @@ static PlayMode selectedPlayMode = PlayMode::TOGETHER;
 // MAIN MANU
 void MainMenuScene::init() {
     // UI
-    m_PlayButton = new Button(COLOR_BLUE);
+
+    float fontSize = 25;
+    shared::Vec2 size = {200, 60};
+
+    m_PlayButton = new Button();
     m_PlayButton->m_Label.m_Text = "PLAY";
-    m_PlayButton->m_Size = {200, 60};
+    m_PlayButton->m_Size = size;
+    m_PlayButton->m_Label.m_Style.fontSize = fontSize;
 
-    m_SettingsButton = new Button(COLOR_BLUE);
+    m_SettingsButton = new Button();
     m_SettingsButton->m_Label.m_Text = "SETTINGS";
-    m_SettingsButton->m_Size = {200, 60};
+    m_SettingsButton->m_Size = size;
+    m_SettingsButton->m_Label.m_Style.fontSize = fontSize;
 
-    m_ExitButton = new Button(COLOR_BLUE);
+    m_ExitButton = new Button();
     m_ExitButton->m_Label.m_Text = "EXIT";
-    m_ExitButton->m_Size = {200, 60};
+    m_ExitButton->m_Size = size;
+    m_ExitButton->m_Label.m_Style.fontSize = fontSize;
 
-    m_BackButton = new Button(COLOR_BLUE);
-    m_BackButton->m_Label.m_Text = "BACK";
-    m_BackButton->m_Size = {100, 30};
-
-    m_TogetherModeButton = new Button(COLOR_BLUE);
+    m_TogetherModeButton = new Button();
     m_TogetherModeButton->m_Label.m_Text = "TOGETHER";
-    m_TogetherModeButton->m_Size = {200, 60};
+    m_TogetherModeButton->m_Size = size;
+    m_TogetherModeButton->m_Label.m_Style.fontSize = fontSize;
 
-    m_AiModeButton = new Button(COLOR_BLUE);
+    m_AiModeButton = new Button();
     m_AiModeButton->m_Label.m_Text = "AI";
-    m_AiModeButton->m_Size = {200, 60};
+    m_AiModeButton->m_Size = size;
+    m_AiModeButton->m_Label.m_Style.fontSize = fontSize;
 
     m_MainLabel = new Label();
     m_MainLabel->m_Text = "Ping Pong";
-    m_MainLabel->m_FontSize = 40;
+    m_MainLabel->m_Style.fontSize = 40;
+
+    m_BackButton = new Button();
+    m_BackButton->m_Label.m_Text = "BACK";
+    m_BackButton->m_Size = {100, 30};
+    m_BackButton->m_Label.m_Style.fontSize = 15;
 
     App()->UI()->add("Play", m_PlayButton);
     App()->UI()->add("Settings", m_SettingsButton);
@@ -53,40 +63,40 @@ void MainMenuScene::init() {
 
 void MainMenuScene::update() {
     if (m_CurrentWindow == WindowState::MAIN) {
-        if (m_PlayButton->m_LeftClickPressed) {
+        if (m_PlayButton->m_LeftClickReleased) {
             m_CurrentWindow = WindowState::SELECT_MODE;
             m_MainLabel->m_Text = "Selected Mode";
             return;
         }
-        if (m_SettingsButton->m_LeftClickPressed) {
+        if (m_SettingsButton->m_LeftClickReleased) {
             m_CurrentWindow = WindowState::SETTINGS;
             m_MainLabel->m_Text = "Settings";
             return;
         }
-        if (m_ExitButton->m_LeftClickPressed) {
+        if (m_ExitButton->m_LeftClickReleased) {
             App()->Window()->closeWindow();
             return;
         }
     }
     else if (m_CurrentWindow == WindowState::SELECT_MODE) {
-        if (m_BackButton->m_LeftClickPressed) {
+        if (m_BackButton->m_LeftClickReleased) {
             m_CurrentWindow = WindowState::MAIN;
             m_MainLabel->m_Text = "Ping Pong";
             return;
         }
-        if (m_TogetherModeButton->m_LeftClickPressed) {
+        if (m_TogetherModeButton->m_LeftClickReleased) {
             selectedPlayMode = PlayMode::TOGETHER;
             App()->setScene(new GameScene());
             return;
         }
-        if (m_AiModeButton->m_LeftClickPressed) {
+        if (m_AiModeButton->m_LeftClickReleased) {
             selectedPlayMode = PlayMode::AI;
             App()->setScene(new GameScene());
             return;
         }
     }
     else if (m_CurrentWindow == WindowState::SETTINGS) {
-        if (m_BackButton->m_LeftClickPressed) {
+        if (m_BackButton->m_LeftClickReleased) {
             m_CurrentWindow = WindowState::MAIN;
             m_MainLabel->m_Text = "Ping Pong";
             return;
@@ -188,7 +198,7 @@ void MainMenuScene::cleanup() {
 // GAME
 void GameScene::init() {
     m_Game = new GameController();
-    m_Game->init(960, 540, 180, selectedPlayMode);
+    m_Game->init(960, 540, 5, selectedPlayMode);
 
     App()->Camera()->setTarget(m_Game->getFieldCenter());
     App()->Camera()->onResize(App()->Window()->getScreenSize());

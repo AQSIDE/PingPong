@@ -19,18 +19,14 @@ void checkCollisionPlayerWithBall(Player &p, Ball &b) {
     float dx = fabsf(p.m_Transform.m_Pos.x - b.m_Transform.m_Pos.x);
     float dy = fabsf(p.m_Transform.m_Pos.y - b.m_Transform.m_Pos.y);
 
-    // Сумма половин размеров
     float combinedHalfW = (p.m_Transform.m_Size.x + b.m_Transform.m_Size.x) / 2.0f;
     float combinedHalfH = (p.m_Transform.m_Size.y + b.m_Transform.m_Size.y) / 2.0f;
 
     if (dx < combinedHalfW && dy < combinedHalfH) {
-        // Определяем, с какой стороны летит мяч, чтобы правильно отбить
         if (b.m_Transform.m_Pos.x < p.m_Transform.m_Pos.x) {
-            // Удар в левую сторону ракетки (мяч летит влево)
             b.m_Transform.m_Vel.x = -fabsf(b.m_Transform.m_Vel.x);
             b.m_Transform.m_Pos.x = p.m_Transform.m_Pos.x - combinedHalfW;
         } else {
-            // Удар в правую сторону ракетки (мяч летит вправо)
             b.m_Transform.m_Vel.x = fabsf(b.m_Transform.m_Vel.x);
             b.m_Transform.m_Pos.x = p.m_Transform.m_Pos.x + combinedHalfW;
         }
@@ -68,17 +64,13 @@ void Ball::renderTrail() {
     auto *r = App()->Render();
 
     for (int i = 0; i < TRAIL_SIZE; i++) {
-        // Вычисляем индекс от самого старого к самому новому
         int index = (m_BallTrail.head + i) % TRAIL_SIZE;
 
-        // Чем старее позиция (меньше i), тем прозрачнее цвет
-        float alpha = (float) (i + 1) / (float) TRAIL_SIZE; // от 0.2 до 1.0
+        float alpha = (float) (i + 1) / (float) TRAIL_SIZE;
 
-        // Создаем временный контекст с прозрачностью
         RenderContext trailCtx = m_RenderContext;
-        trailCtx.color = shared::ColorRGBA::alpha(m_RenderContext.color, alpha * 0.5f); // 0.5 для мягкости
+        trailCtx.color = shared::ColorRGBA::alpha(m_RenderContext.color, alpha * 0.5f);
 
-        // Временно меняем позицию трансформа для отрисовки
         Transform2D tempTr = m_Transform;
         tempTr.m_Pos = m_BallTrail.positions[index];
         tempTr.m_Size = shared::Vec2::scale(m_Transform.m_Size, alpha);
@@ -142,17 +134,33 @@ void GameController::init(int fieldW, int fieldH, float gameTime, PlayMode playM
     m_Player2.m_RenderContext.color = {0, 121, 241, 255};
     m_Ball.m_RenderContext.color = COLOR_WHITE;
 
-    // UI
-    App()->UI()->add("ScoreP1", new Label("0", 50));
-    App()->UI()->add("ScoreP2", new Label("0", 50));
-    App()->UI()->add("Timer", new Label("60", 60));
+    auto* timerLabel = new Label();
+    timerLabel->m_Style.fontSize = 40;
 
-    auto endBtn = new Button(COLOR_BLUE);
+    auto* score1Label = new Label();
+    score1Label->m_Style.fontSize = 30;
+
+    auto* score2Label = new Label();
+    score2Label->m_Style.fontSize = 30;
+
+    // UI
+    App()->UI()->add("ScoreP1", score1Label);
+    App()->UI()->add("ScoreP2", score2Label);
+    App()->UI()->add("Timer", timerLabel);
+
+    auto endBtn = new Button();
     endBtn->m_Size = {300, 50};
     endBtn->m_Label.m_Text = "Back to menu";
+    endBtn->m_Label.m_Style.fontSize = 20;
 
-    App()->UI()->add("Text1", new Label("GAME FINISHED", 60));
-    App()->UI()->add("Text2", new Label("SCORE", 40));
+    auto* text1 = new Label("GAME FINISHED");
+    text1->m_Style.fontSize = 30;
+
+    auto* text2 = new Label("SCORE");
+    text2->m_Style.fontSize = 30;
+
+    App()->UI()->add("Text1", text1);
+    App()->UI()->add("Text2", text2);
     App()->UI()->add("EndBtn", endBtn);
 }
 
@@ -336,7 +344,7 @@ void GameController::renderEndScreen() {
 
     auto *endTxt = App()->UI()->get<Label>("Text1");
     endTxt->m_Text = "GAME FINISHED";
-    endTxt->m_FontSize = 60;
+    endTxt->m_Style.fontSize = 50;
     endTxt->m_Position = {sc.x / 2.0f, sc.y * 0.3f};
     endTxt->draw();
 
@@ -356,7 +364,7 @@ void GameController::renderCooldownScreen() {
 
     auto *text = App()->UI()->get<Label>("Text1");
     text->m_Position = {sc.x / 2.0f, sc.y / 2.0f};
-    text->m_FontSize = 100;
+    text->m_Style.fontSize = 60;
 
     std::string txt;
     if (m_CooldownTimer > 1)

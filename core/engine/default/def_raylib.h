@@ -28,7 +28,8 @@ public:
     void endRenderTexture() override;
     void beginShader(const ShaderHandle &shader) override;
     void endShader() override;
-    void drawRectRounded(shared::Rect rect, float radius, float segments, shared::ColorRGBA color) override;
+    void drawRectRounded(shared::Rect rect, float radius, int segments, shared::ColorRGBA color) override;
+    void drawRectRoundedLines(shared::Rect rect, float thickness, float radius, int segments, shared::ColorRGBA color) override;
     void drawText(const FontHandle &font, const std::string &text, shared::Vec2 pos, float fontSize, float spacing = 1.0f, shared::ColorRGBA color = COLOR_WHITE) override;
     void drawCircle(shared::Vec2 pos, int radius, shared::ColorRGBA color) override;
     void drawTexture(const TextureHandle &t, shared::Rect source, shared::Rect dest, shared::Vec2 pivot, float rot, shared::ColorRGBA color) override;

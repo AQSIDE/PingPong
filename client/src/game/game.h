@@ -5,7 +5,6 @@
 
 constexpr float BALL_START_VELOCITY_X = 300;
 constexpr float BALL_START_VELOCITY_Y = 300;
-constexpr float GAME_TIME = 180;
 constexpr float COOLDOWN_TIME = 5;
 
 #define TRAIL_SIZE 10

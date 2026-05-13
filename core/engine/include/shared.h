@@ -36,7 +36,7 @@ namespace shared {
             };
         }
 
-        static inline ColorRGBA alpha(ColorRGBA color, float alphaFactor) {
+        static ColorRGBA alpha(ColorRGBA color, float alphaFactor) {
             return {
                 color.r,
                 color.g,
@@ -45,7 +45,7 @@ namespace shared {
             };
         }
 
-        static inline ColorRGBA brightness(ColorRGBA color, float factor) {
+        static ColorRGBA brightness(ColorRGBA color, float factor) {
             if (factor < -1.0f) factor = -1.0f;
             if (factor > 1.0f) factor = 1.0f;
 
@@ -65,6 +65,15 @@ namespace shared {
                     color.a
                 };
             }
+        }
+
+        static ColorRGBA lerp(const ColorRGBA& start, const ColorRGBA& end, float t) {
+            return {
+                (unsigned char)(start.r + (end.r - start.r) * t),
+                (unsigned char)(start.g + (end.g - start.g) * t),
+                (unsigned char)(start.b + (end.b - start.b) * t),
+                (unsigned char)(start.a + (end.a - start.a) * t)
+            };
         }
     };
 }

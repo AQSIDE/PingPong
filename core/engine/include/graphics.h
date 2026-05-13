@@ -47,7 +47,7 @@ public:
 
     // PRIMITIVES
     virtual void drawRect(shared::Rect rect, shared::ColorRGBA color) = 0;
-    virtual void drawRectRounded(shared::Rect rect, float radius, float segments, shared::ColorRGBA color) = 0;
+    virtual void drawRectRounded(shared::Rect rect, float radius, int segments, shared::ColorRGBA color) = 0;
     virtual void drawText(const FontHandle& font, const std::string& text, shared::Vec2 pos, float fontSize, float spacing = 1.0f, shared::ColorRGBA color = COLOR_WHITE) = 0;
     virtual void drawCircle(shared::Vec2 pos, int radius, shared::ColorRGBA color) = 0;
 
@@ -55,5 +55,6 @@ public:
     virtual void drawTexture(const TextureHandle& tex, shared::Vec2 pos, shared::ColorRGBA color = COLOR_WHITE) = 0;
 
     virtual void drawRectLines(shared::Rect rect, float thickness, shared::ColorRGBA color) = 0;
+    virtual void drawRectRoundedLines(shared::Rect rect, float thickness, float radius, int segments, shared::ColorRGBA color) = 0;
     virtual void drawLine(shared::Vec2 start, shared::Vec2 end, float thickness, shared::ColorRGBA color) = 0;
 };

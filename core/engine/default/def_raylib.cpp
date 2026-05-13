@@ -177,8 +177,12 @@ void RaylibGraphics::drawRect(shared::Rect rect, shared::ColorRGBA color) {
                      { color.r, color.g, color.b, color.a });
 }
 
-void RaylibGraphics::drawRectRounded(shared::Rect rect, float radius, float segments, shared::ColorRGBA color) {
+void RaylibGraphics::drawRectRounded(shared::Rect rect, float radius, int segments, shared::ColorRGBA color) {
     DrawRectangleRounded({ rect.x, rect.y, rect.width, rect.height }, radius, segments,{ color.r, color.g, color.b, color.a });
+}
+
+void RaylibGraphics::drawRectRoundedLines(shared::Rect rect, float thickness, float radius, int segments, shared::ColorRGBA color) {
+    DrawRectangleRoundedLinesEx({ rect.x, rect.y, rect.width, rect.height }, radius, segments, thickness, { color.r, color.g, color.b, color.a });
 }
 
 void RaylibGraphics::drawText(const FontHandle &font, const std::string &text, shared::Vec2 pos, float fontSize, float spacing, shared::ColorRGBA color) {

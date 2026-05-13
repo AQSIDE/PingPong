@@ -95,26 +95,47 @@ void Label::update() {
     if (!m_IsActive) return;
     UIElement::update();
 
-    if (m_IsHovered) {
-        App()->Window()->setMouseCursor(CursorType::IBEAM);
-    }
+    // if (m_IsHovered) {
+    //     App()->Window()->setMouseCursor(CursorType::IBEAM);
+    // }
 }
 
 void Label::draw() {
-    if (!m_IsVisible) return;
+    if (!m_IsVisible || m_Text.empty()) return;
 
-    auto font = App()->getUISettings().textFont;
-    float spacing = 1.0f;
+    float currentSize = (m_Style.fontSize > 0) ? (float)(m_Style.fontSize) : (float)App()->getUISettings().textFontSize;
 
-    float currentSize = (m_FontSize > 0) ? (float)m_FontSize : 20.0f;
-    shared::Vec2 textSize = App()->Graphics()->measureText(font, m_Text.c_str(), currentSize, spacing);
+    shared::Vec2 textSize = App()->Graphics()->measureText(m_Font, m_Text, currentSize, m_Style.spacing);
 
     shared::Vec2 drawPos = {
         m_Position.x - textSize.x * m_Pivot.x,
         m_Position.y - textSize.y * m_Pivot.y,
     };
 
-    App()->Graphics()->drawText(font, m_Text, drawPos, currentSize, spacing, m_Color);
+    if (m_Style.shadowColor.a > 0) {
+        shared::Vec2 shadowDrawPos = {
+            drawPos.x + m_Style.shadowOffset.x,
+            drawPos.y + m_Style.shadowOffset.y
+        };
+
+        App()->Graphics()->drawText(
+            m_Font,
+            m_Text,
+            shadowDrawPos,
+            currentSize,
+            m_Style.spacing,
+            m_Style.shadowColor
+        );
+    }
+
+    App()->Graphics()->drawText(
+        m_Font,
+        m_Text,
+        drawPos,
+        currentSize,
+        m_Style.spacing,
+        m_Style.color
+    );
 }
 
 void Button::update() {
@@ -124,20 +145,62 @@ void Button::update() {
     if (m_IsHovered) {
         App()->Window()->setMouseCursor(CursorType::POINTING_HAND);
     }
+
+    shared::ColorRGBA targetColor = m_Style.color;
+    float targetScale = 1.0f;
+
+    if (m_IsHovered) {
+        targetColor = m_Style.hoverColor;
+        targetScale = m_Style.scaleFactor;
+    }
+
+    if (m_LeftClickPressed) {
+        targetColor = m_Style.activeColor;
+        targetScale = m_Style.scaleFactor;
+    }
+
+    float dt = App()->getFrame().deltaTime * 15.0f;
+    dt = std::min(dt, 1.0f);
+
+    m_currentColor = shared::ColorRGBA::lerp(m_currentColor, targetColor, dt);
+    m_currentScale = m_currentScale + (targetScale - m_currentScale) * dt;
+
+    // if (!m_Label.m_Text.empty()) {
+    //     m_Label.update();
+    // }
 }
 
 void Button::draw() {
     if (!m_IsVisible) return;
-    shared::ColorRGBA target = m_Color;
-    if (m_IsHovered) {
-        target = m_HoverColor;
-    }
 
     auto rect = getRect();
-    App()->Graphics()->drawRect(rect, target);
+
+    if (m_currentScale != 1.0f) {
+        float centerX = rect.x + rect.width / 2.0f;
+        float centerY = rect.y + rect.height / 2.0f;
+        rect.width *= m_currentScale;
+        rect.height *= m_currentScale;
+        rect.x = centerX - rect.width / 2.0f;
+        rect.y = centerY - rect.height / 2.0f;
+    }
+
+    if (m_Style.borderRadius > 0.0f) {
+        App()->Graphics()->drawRectRounded(rect, m_Style.borderRadius, m_Style.borderFragments, m_currentColor);
+
+        if (m_Style.outlineThickness > 0.0f) {
+            App()->Graphics()->drawRectRoundedLines(rect, m_Style.outlineThickness, m_Style.borderRadius, m_Style.borderFragments, m_Style.outlineColor);
+        }
+    }
+    else {
+        App()->Graphics()->drawRect(rect, m_currentColor);
+
+        if (m_Style.outlineThickness > 0.0f) {
+            App()->Graphics()->drawRectLines(rect, m_Style.outlineThickness, m_Style.outlineColor);
+        }
+    }
 
     if (!m_Label.m_Text.empty()) {
-        m_Label.m_Position = { rect.x + rect.width / 2, rect.y + rect.height / 2 };
+        m_Label.m_Position = { rect.x + rect.width / 2.0f, rect.y + rect.height / 2.0f };
         m_Label.draw();
     }
 }
