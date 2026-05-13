@@ -28,7 +28,7 @@ class CameraBase : public ICamera {
 public:
     CameraData m_Data;
 
-    CameraBase(const CameraData &data);
+    CameraBase(const CameraData &data = {});
 
     void setTarget(shared::Vec2 target) override;
     void setOffset(shared::Vec2 offset) override;

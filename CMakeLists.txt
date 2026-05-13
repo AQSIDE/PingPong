@@ -15,5 +15,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/client/src/game)
 # CORE
 file(GLOB_RECURSE CORE_SOURCES core/engine/*.cpp)
 
-add_executable(client ${CLIENT_SOURCES} ${CORE_SOURCES})
-target_link_libraries(client PRIVATE wininet raylib opengl32 gdi32 winmm)
+add_executable(PingPong ${CLIENT_SOURCES} ${CORE_SOURCES})
+target_link_libraries(PingPong PRIVATE wininet raylib opengl32 gdi32 winmm)
+
+add_custom_command(TARGET PingPong POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/client/assets"
+        "$<TARGET_FILE_DIR:PingPong>/assets"
+)

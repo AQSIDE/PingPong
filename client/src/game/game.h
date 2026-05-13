@@ -5,7 +5,7 @@
 
 constexpr float BALL_START_VELOCITY_X = 300;
 constexpr float BALL_START_VELOCITY_Y = 300;
-constexpr float GAME_TIME = 60;
+constexpr float GAME_TIME = 180;
 constexpr float COOLDOWN_TIME = 5;
 
 #define TRAIL_SIZE 10
@@ -38,11 +38,17 @@ enum class GameState {
     FINISHED,
 };
 
+enum class PlayMode {
+    TOGETHER,
+    AI,
+};
+
 class GameController {
     Player m_Player1;
     Player m_Player2;
     Ball m_Ball;
     GameState m_GameState;
+    PlayMode m_PlayMode;
 
     PlayersController m_PlayersController;
 
@@ -69,16 +75,18 @@ class GameController {
     void renderEndScreen();
     void renderCooldownScreen();
 public:
-    void init(int fieldW, int fieldH);
+    void init(int fieldW, int fieldH, float gameTime, PlayMode playMode);
     void cleanup();
     void render();
     void update();
 
     Player& getP1();
     Player& getP2();
+    const Ball& getBall() const;
     shared::Vec2 getFieldCenter();
     shared::Vec2 getFieldSize();
     void resetBall();
     void updateState(GameState newState);
     GameState getState() const;
+    PlayMode getPlayMode() const;
 };

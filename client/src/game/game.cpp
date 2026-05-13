@@ -87,7 +87,7 @@ void Ball::renderTrail() {
     }
 }
 
-void GameController::init(int fieldW, int fieldH) {
+void GameController::init(int fieldW, int fieldH, float gameTime, PlayMode playMode) {
     auto sc = App()->Window()->getScreenSize();
     auto *graphics = App()->Graphics();
 
@@ -98,7 +98,8 @@ void GameController::init(int fieldW, int fieldH) {
     m_PlayersController.init(this);
     m_Player1Score = 0;
     m_Player2Score = 0;
-    m_Timer = GAME_TIME;
+    m_Timer = gameTime;
+    m_PlayMode = playMode;
     m_CooldownTimer = COOLDOWN_TIME;
     m_GameState = GameState::IDLE;
     m_BoardTheme = COLORS::getBoardTheme();
@@ -127,10 +128,10 @@ void GameController::init(int fieldW, int fieldH) {
     m_Ball.m_Transform.m_Pos.y = centerY;
 
     // TEXTURE
-    m_PlayerTexture = graphics->loadTexture("client/assets/textures/player.png");
-    m_BallTexture = graphics->loadTexture("client/assets/textures/ball.png");
-    m_scoreBarTexture = graphics->loadTexture("client/assets/textures/score_bar.png");
-    m_BloomShader = graphics->loadShader("client/assets/shaders/bloom.fs", "");
+    m_PlayerTexture = graphics->loadTexture("assets/textures/player.png");
+    m_BallTexture = graphics->loadTexture("assets/textures/ball.png");
+    m_scoreBarTexture = graphics->loadTexture("assets/textures/score_bar.png");
+    m_BloomShader = graphics->loadShader("assets/shaders/bloom.fs", "");
     m_BloomTarget = graphics->createRenderTexture((int) sc.x, (int) sc.y);
 
     m_Player1.m_RenderContext.texture = &m_PlayerTexture;
@@ -383,12 +384,20 @@ Player &GameController::getP2() {
     return m_Player2;
 }
 
+const Ball &GameController::getBall() const {
+    return m_Ball;
+}
+
 void GameController::updateState(GameState newState) {
     m_GameState = newState;
 }
 
 GameState GameController::getState() const {
     return m_GameState;
+}
+
+PlayMode GameController::getPlayMode() const {
+    return m_PlayMode;
 }
 
 void GameController::resetBall() {

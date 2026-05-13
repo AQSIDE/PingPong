@@ -4,9 +4,22 @@
 #include "game.h"
 
 class MainMenuScene : public IScene {
-    Button* m_PlayButton = nullptr;
-    Label* m_NameGameLabel = nullptr;
+    enum class WindowState {
+        MAIN,
+        SETTINGS,
+        SELECT_MODE,
+    };
+
+    WindowState m_CurrentWindow = WindowState::MAIN;
     TextureHandle m_ScreenTexture;
+
+    Button* m_PlayButton = nullptr;
+    Button* m_SettingsButton = nullptr;
+    Button* m_BackButton = nullptr;
+    Button* m_ExitButton = nullptr;
+    Button* m_TogetherModeButton = nullptr;
+    Button* m_AiModeButton = nullptr;
+    Label* m_MainLabel = nullptr;
 
     void renderBackground();
 public:
