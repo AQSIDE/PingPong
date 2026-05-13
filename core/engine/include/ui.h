@@ -164,7 +164,7 @@ struct ButtonStyle {
         shared::ColorRGBA outline = COLOR_WHITE,
         float thickness = 1.0f,
         float radius = 0.5f,
-        int fragments = 32,
+        int fragments = 8,
         float scale = 1.05f
     ) : color(baseColor),
         hoverColor(shared::ColorRGBA::brightness(baseColor, -0.5f)),

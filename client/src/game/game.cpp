@@ -16,22 +16,49 @@ shared::Vec2 getBallVelocity() {
 }
 
 void checkCollisionPlayerWithBall(Player &p, Ball &b) {
-    float dx = fabsf(p.m_Transform.m_Pos.x - b.m_Transform.m_Pos.x);
-    float dy = fabsf(p.m_Transform.m_Pos.y - b.m_Transform.m_Pos.y);
+    float pHalfW = p.m_Transform.m_Size.x / 2.0f;
+    float pHalfH = p.m_Transform.m_Size.y / 2.0f;
 
-    float combinedHalfW = (p.m_Transform.m_Size.x + b.m_Transform.m_Size.x) / 2.0f;
-    float combinedHalfH = (p.m_Transform.m_Size.y + b.m_Transform.m_Size.y) / 2.0f;
+    float ballRadius = b.m_Transform.m_Size.x / 2.0f;
 
-    if (dx < combinedHalfW && dy < combinedHalfH) {
-        if (b.m_Transform.m_Pos.x < p.m_Transform.m_Pos.x) {
-            b.m_Transform.m_Vel.x = -fabsf(b.m_Transform.m_Vel.x);
-            b.m_Transform.m_Pos.x = p.m_Transform.m_Pos.x - combinedHalfW;
+    float diffX = b.m_Transform.m_Pos.x - p.m_Transform.m_Pos.x;
+    float diffY = b.m_Transform.m_Pos.y - p.m_Transform.m_Pos.y;
+
+    float closestX = std::clamp(diffX, -pHalfW, pHalfW);
+    float closestY = std::clamp(diffY, -pHalfH, pHalfH);
+
+    float normalX = diffX - closestX;
+    float normalY = diffY - closestY;
+
+    float distanceSq = (normalX * normalX) + (normalY * normalY);
+
+    if (distanceSq < (ballRadius * ballRadius)) {
+        float distance = sqrtf(distanceSq);
+
+        if (distance == 0.0f) {
+            normalX = 1.0f;
+            normalY = 0.0f;
+            distance = 1.0f;
         } else {
-            b.m_Transform.m_Vel.x = fabsf(b.m_Transform.m_Vel.x);
-            b.m_Transform.m_Pos.x = p.m_Transform.m_Pos.x + combinedHalfW;
+            normalX /= distance;
+            normalY /= distance;
         }
 
-        b.m_Transform.m_Vel = shared::Vec2::scale(b.m_Transform.m_Vel, 1.05f);
+        float penetration = ballRadius - distance;
+        b.m_Transform.m_Pos.x += normalX * penetration;
+        b.m_Transform.m_Pos.y += normalY * penetration;
+
+        float dotProduct = (b.m_Transform.m_Vel.x * normalX) + (b.m_Transform.m_Vel.y * normalY);
+
+        if (dotProduct < 0.0f) {
+            b.m_Transform.m_Vel.x = b.m_Transform.m_Vel.x - 2.0f * dotProduct * normalX;
+            b.m_Transform.m_Vel.y = b.m_Transform.m_Vel.y - 2.0f * dotProduct * normalY;
+
+            float playerInfluenceY = p.m_Transform.m_Vel.y * 0.35f;
+            b.m_Transform.m_Vel.y += playerInfluenceY;
+
+            b.m_Transform.m_Vel = shared::Vec2::scale(b.m_Transform.m_Vel, 1.05f);
+        }
     }
 }
 

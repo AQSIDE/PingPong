@@ -198,7 +198,7 @@ void MainMenuScene::cleanup() {
 // GAME
 void GameScene::init() {
     m_Game = new GameController();
-    m_Game->init(960, 540, 5, selectedPlayMode);
+    m_Game->init(960, 540, 180, selectedPlayMode);
 
     App()->Camera()->setTarget(m_Game->getFieldCenter());
     App()->Camera()->onResize(App()->Window()->getScreenSize());
