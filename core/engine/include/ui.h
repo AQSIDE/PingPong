@@ -5,26 +5,23 @@
 class UIElement {
 public:
     shared::Vec2 m_Position;
-    shared::Vec2 m_Size;
 
-    bool m_IsHovered;
-    bool m_LeftClickReleased;
-    bool m_LeftClickPressed;
+    bool m_IsHovered = false;
+    bool m_LeftClickReleased = false;
+    bool m_LeftClickPressed = false;
 
     bool m_IsActive;
     bool m_IsVisible;
 
-    UIElement(shared::Vec2 pos = {0}, shared::Vec2 size = {100, 100}) : m_Position(pos), m_Size(size), m_IsActive(true),
-                                                                        m_IsVisible(true) {
-    }
+    UIElement(shared::Vec2 pos = {0, 0})
+        : m_Position(pos), m_IsActive(true), m_IsVisible(true) {}
 
-    virtual ~UIElement() {
-    }
+    virtual ~UIElement() {}
 
-    virtual void update();
+    virtual void update() = 0;
     virtual void draw() = 0;
-    shared::Rect getRect() const;
-    void setRect(shared::Rect rect);
+
+    virtual shared::Rect getRect() const;
 };
 
 class UIManager {
@@ -71,22 +68,53 @@ public:
     }
 };
 
-class Panel : public UIElement {
-public:
-    shared::ColorRGBA m_HoverColor;
-    shared::ColorRGBA m_Color;
+struct PanelStyle {
+    shared::ColorRGBA color;
+    shared::ColorRGBA hoverColor;
+    shared::ColorRGBA activeColor;
+    shared::ColorRGBA outlineColor;
 
-    Panel(shared::Vec2 size = {100, 100}, shared::ColorRGBA color = COLOR_WHITE) : UIElement({0}, size), m_Color(color),
-        m_HoverColor(shared::ColorRGBA::brightness(color, -0.2f)) {
+    float outlineThickness;
+    float borderRadius;
+    int borderFragments;
+    float scaleFactor;
+
+    PanelStyle(
+        shared::ColorRGBA baseColor = COLOR_RED,
+        shared::ColorRGBA outline = COLOR_WHITE,
+        float thickness = 1.0f,
+        float radius = 0.5f,
+        int fragments = 8,
+        float scale = 1.05f
+    ) : color(baseColor),
+        hoverColor(shared::ColorRGBA::brightness(baseColor, -0.5f)),
+        activeColor(shared::ColorRGBA::brightness(baseColor, 0.5f)),
+        outlineColor(outline),
+        outlineThickness(thickness),
+        borderRadius(radius),
+        borderFragments(fragments),
+        scaleFactor(scale) {
     }
+};
 
-    Panel(shared::ColorRGBA color = COLOR_WHITE) : m_Color(color),
-                                                   m_HoverColor(shared::ColorRGBA::brightness(color, -0.2f)) {
+class Panel : public UIElement {
+private:
+    shared::ColorRGBA m_currentColor;
+    float m_currentScale = 1.0f;
+
+public:
+    PanelStyle m_Style;
+    shared::Vec2 m_Size;
+
+    Panel(shared::Vec2 size = {100, 100}, const PanelStyle& style = {}) : m_Style(style), m_Size(size) {
+        m_currentColor = m_Style.color;
     }
 
     void update() override;
-
     void draw() override;
+    shared::Rect getRect() const override;
+
+    void setColor(shared::ColorRGBA color);
 };
 
 class InputField : public UIElement {
@@ -106,7 +134,6 @@ public:
     }
 
     void update() override;
-
     void draw() override;
 };
 
@@ -148,45 +175,11 @@ public:
     void draw() override;
 };
 
-struct ButtonStyle {
-    shared::ColorRGBA color;
-    shared::ColorRGBA hoverColor;
-    shared::ColorRGBA activeColor;
-    shared::ColorRGBA outlineColor;
-
-    float outlineThickness;
-    float borderRadius;
-    int borderFragments;
-    float scaleFactor;
-
-    ButtonStyle(
-        shared::ColorRGBA baseColor = COLOR_RED,
-        shared::ColorRGBA outline = COLOR_WHITE,
-        float thickness = 1.0f,
-        float radius = 0.5f,
-        int fragments = 8,
-        float scale = 1.05f
-    ) : color(baseColor),
-        hoverColor(shared::ColorRGBA::brightness(baseColor, -0.5f)),
-        activeColor(shared::ColorRGBA::brightness(baseColor, 0.5f)),
-        outlineColor(outline),
-        outlineThickness(thickness),
-        borderRadius(radius),
-        borderFragments(fragments),
-        scaleFactor(scale) {
-    }
-};
-
-class Button : public UIElement {
-    shared::ColorRGBA m_currentColor;
-    float m_currentScale = 1.0f;
-
+class Button : public Panel {
 public:
     Label m_Label;
-    ButtonStyle m_Style;
 
-    Button(const ButtonStyle &style = {}) : m_Style(style), m_Label("TEXT") {
-    }
+    Button(shared::Vec2 size = {100, 100}, const PanelStyle& style = {}, const Label& label = {"TEXT"}) : Panel(size, style), m_Label(label) {}
 
     void update() override;
     void draw() override;

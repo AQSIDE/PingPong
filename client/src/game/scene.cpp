@@ -47,6 +47,12 @@ void MainMenuScene::init() {
     m_BackButton->m_Size = {100, 30};
     m_BackButton->m_Label.m_Style.fontSize = 15;
 
+    m_BgPanel = new Panel();
+    m_BgPanel->m_IsActive = false;
+    m_BgPanel->m_Style.borderRadius = 0.1f;
+    m_BgPanel->m_Style.outlineColor = {255, 255, 255, 100};
+    m_BgPanel->setColor(shared::ColorRGBA::fromHex(0x1F1F1FCE));
+
     App()->UI()->add("Play", m_PlayButton);
     App()->UI()->add("Settings", m_SettingsButton);
     App()->UI()->add("Exit", m_ExitButton);
@@ -54,6 +60,7 @@ void MainMenuScene::init() {
     App()->UI()->add("TogetherMode", m_TogetherModeButton);
     App()->UI()->add("AiMode", m_AiModeButton);
     App()->UI()->add("MainLabel", m_MainLabel);
+    App()->UI()->add("Panel", m_BgPanel);
 
     // OTHER
     App()->m_BackgroundColor = shared::ColorRGBA::fromHex(0x181818FF);
@@ -104,7 +111,6 @@ void MainMenuScene::update() {
     }
 }
 
-
 void MainMenuScene::render() {
     shared::Vec2 s = App()->Window()->getScreenSize();
 
@@ -122,9 +128,10 @@ void MainMenuScene::render() {
 
         float panelX = (s.x - panelW) / 2.0f;
         float panelY = (s.y - panelH) / 2.0f;
-        shared::ColorRGBA panelColor = shared::ColorRGBA::fromHex(0x1F1F1FCE);
 
-        App()->Graphics()->drawRectRounded({ panelX, panelY, panelW, panelH }, 0.1f, 32, panelColor);
+        m_BgPanel->m_Size = { panelW, panelH };
+        m_BgPanel->m_Position = { panelX, panelY };
+        m_BgPanel->draw();
 
         m_BackButton->m_Position = { (s.x - m_BackButton->m_Size.x) / 2.0f, s.y - m_BackButton->m_Size.y - 20 };
         m_BackButton->draw();
@@ -191,6 +198,7 @@ void MainMenuScene::cleanup() {
     App()->UI()->remove("TogetherMode");
     App()->UI()->remove("AiMode");
     App()->UI()->remove("MainLabel");
+    App()->UI()->remove("Panel");
 
     App()->Graphics()->unloadTexture(m_ScreenTexture);
 }

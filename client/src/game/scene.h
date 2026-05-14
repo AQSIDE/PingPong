@@ -20,6 +20,7 @@ class MainMenuScene : public IScene {
     Button* m_TogetherModeButton = nullptr;
     Button* m_AiModeButton = nullptr;
     Label* m_MainLabel = nullptr;
+    Panel* m_BgPanel = nullptr;
 
     void renderBackground();
 public:

@@ -3,39 +3,92 @@
 #include "graphics.h"
 #include "window.h"
 
-void UIElement::update() {
-    shared::Rect rect = getRect();
+void updateState(UIElement* el) {
+    if (!el->m_IsActive) return;
 
-    m_IsHovered = checkCollisionPointRect(App()->Window()->getMousePosition(), rect);
+    shared::Rect rect = el->getRect();
 
-    m_LeftClickReleased = m_IsHovered && App()->getMouseActions().isLeftMouseButtonReleased;
-    m_LeftClickPressed = m_IsHovered && App()->getMouseActions().isLeftMouseButtonPressed;
+    el->m_IsHovered = checkCollisionPointRect(App()->Window()->getMousePosition(), rect);
+
+    el->m_LeftClickReleased = el->m_IsHovered && App()->getMouseActions().isLeftMouseButtonReleased;
+    el->m_LeftClickPressed = el->m_IsHovered && App()->getMouseActions().isLeftMouseButtonPressed;
 }
 
 shared::Rect UIElement::getRect() const {
-    return { m_Position.x, m_Position.y, m_Size.x, m_Size.y };
+    return {m_Position.x, m_Position.y, 0, 0};
 }
 
-void UIElement::setRect(shared::Rect rect) {
-    m_Position.x = rect.x;
-    m_Position.y = rect.y;
-    m_Size.x = rect.width;
-    m_Size.y = rect.height;
+void Panel::setColor(shared::ColorRGBA color) {
+    m_currentColor = color;
+    m_Style.color = color;
 }
 
 void Panel::update() {
-    UIElement::update();
+    if (!m_IsActive) return;
+
+    updateState(this);
+
+    shared::ColorRGBA targetColor = m_Style.color;
+    float targetScale = 1.0f;
+
+    if (m_IsHovered) {
+        targetColor = m_Style.hoverColor;
+        targetScale = m_Style.scaleFactor;
+    }
+
+    if (m_LeftClickPressed) {
+        targetColor = m_Style.activeColor;
+        targetScale = m_Style.scaleFactor;
+    }
+
+    float dt = App()->getFrame().deltaTime * 15.0f;
+    dt = std::min(dt, 1.0f);
+
+    m_currentColor = shared::ColorRGBA::lerp(m_currentColor, targetColor, dt);
+    m_currentScale = m_currentScale + (targetScale - m_currentScale) * dt;
 }
 
 void Panel::draw() {
     if (!m_IsVisible) return;
 
-    App()->Graphics()->drawRect(getRect(), m_IsHovered ? m_HoverColor : m_Color);
+    auto rect = getRect();
+
+    if (m_currentScale != 1.0f) {
+        float centerX = rect.x + rect.width / 2.0f;
+        float centerY = rect.y + rect.height / 2.0f;
+        rect.width *= m_currentScale;
+        rect.height *= m_currentScale;
+        rect.x = centerX - rect.width / 2.0f;
+        rect.y = centerY - rect.height / 2.0f;
+    }
+
+    if (m_Style.borderRadius > 0.0f) {
+        App()->Graphics()->drawRectRounded(rect, m_Style.borderRadius, m_Style.borderFragments, m_currentColor);
+
+        if (m_Style.outlineThickness > 0.0f) {
+            App()->Graphics()->drawRectRoundedLines(rect, m_Style.outlineThickness, m_Style.borderRadius, m_Style.borderFragments, m_Style.outlineColor);
+        }
+    }
+    else {
+        App()->Graphics()->drawRect(rect, m_currentColor);
+
+        if (m_Style.outlineThickness > 0.0f) {
+            App()->Graphics()->drawRectLines(rect, m_Style.outlineThickness, m_Style.outlineColor);
+        }
+    }
+}
+
+shared::Rect Panel::getRect() const {
+    float w = m_Size.x * m_currentScale;
+    float h = m_Size.y * m_currentScale;
+    float x = m_Position.x + (m_Size.x - w) / 2.0f;
+    float y = m_Position.y + (m_Size.y - h) / 2.0f;
+    return {x, y, w, h};
 }
 
 void InputField::update() {
     if (!m_IsActive) return;
-    UIElement::update();
+    updateState(this);
 
     if (m_IsHovered) {
         App()->Window()->setMouseCursor(CursorType::POINTING_HAND);
@@ -93,7 +146,6 @@ void InputField::draw() {
 
 void Label::update() {
     if (!m_IsActive) return;
-    UIElement::update();
 
     // if (m_IsHovered) {
     //     App()->Window()->setMouseCursor(CursorType::IBEAM);
@@ -140,30 +192,12 @@ void Label::draw() {
 
 void Button::update() {
     if (!m_IsActive) return;
-    UIElement::update();
+
+    Panel::update();
 
     if (m_IsHovered) {
         App()->Window()->setMouseCursor(CursorType::POINTING_HAND);
     }
-
-    shared::ColorRGBA targetColor = m_Style.color;
-    float targetScale = 1.0f;
-
-    if (m_IsHovered) {
-        targetColor = m_Style.hoverColor;
-        targetScale = m_Style.scaleFactor;
-    }
-
-    if (m_LeftClickPressed) {
-        targetColor = m_Style.activeColor;
-        targetScale = m_Style.scaleFactor;
-    }
-
-    float dt = App()->getFrame().deltaTime * 15.0f;
-    dt = std::min(dt, 1.0f);
-
-    m_currentColor = shared::ColorRGBA::lerp(m_currentColor, targetColor, dt);
-    m_currentScale = m_currentScale + (targetScale - m_currentScale) * dt;
 
     // if (!m_Label.m_Text.empty()) {
     //     m_Label.update();
@@ -173,33 +207,11 @@ void Button::update() {
 void Button::draw() {
     if (!m_IsVisible) return;
 
-    auto rect = getRect();
-
-    if (m_currentScale != 1.0f) {
-        float centerX = rect.x + rect.width / 2.0f;
-        float centerY = rect.y + rect.height / 2.0f;
-        rect.width *= m_currentScale;
-        rect.height *= m_currentScale;
-        rect.x = centerX - rect.width / 2.0f;
-        rect.y = centerY - rect.height / 2.0f;
-    }
-
-    if (m_Style.borderRadius > 0.0f) {
-        App()->Graphics()->drawRectRounded(rect, m_Style.borderRadius, m_Style.borderFragments, m_currentColor);
-
-        if (m_Style.outlineThickness > 0.0f) {
-            App()->Graphics()->drawRectRoundedLines(rect, m_Style.outlineThickness, m_Style.borderRadius, m_Style.borderFragments, m_Style.outlineColor);
-        }
-    }
-    else {
-        App()->Graphics()->drawRect(rect, m_currentColor);
-
-        if (m_Style.outlineThickness > 0.0f) {
-            App()->Graphics()->drawRectLines(rect, m_Style.outlineThickness, m_Style.outlineColor);
-        }
-    }
+    Panel::draw();
 
     if (!m_Label.m_Text.empty()) {
+        auto rect = Panel::getRect();
+
         m_Label.m_Position = { rect.x + rect.width / 2.0f, rect.y + rect.height / 2.0f };
         m_Label.draw();
     }
